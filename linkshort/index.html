@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LinkShort – Simple URL Shortener (ย่อลิงก์ง่าย ๆ)</title>
+  <meta name="description" content="Shorten URLs, copy/share instantly with QR and history (ย่อลิงก์ให้สั้น คัดลอก/แชร์ได้ทันที พร้อม QR และประวัติการใช้งาน)" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Favicons for browser tab -->
+  <link rel="icon" href="icon.png?v=1" type="image/png" sizes="16x16">
+  <link rel="icon" href="icon.png?v=1" type="image/png" sizes="32x32">
+  <link rel="shortcut icon" href="icon.png?v=1" type="image/png">
+  <link rel="apple-touch-icon" href="icon.png?v=1">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <!-- SVG symbol sprites (formal, monochrome) -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+    <symbol id="ic-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2.5" y="7" width="8.5" height="6" rx="3"></rect>
+      <rect x="13" y="7" width="8.5" height="6" rx="3"></rect>
+      <path d="M8.8 10h6.4"></path>
+    </symbol>
+    <symbol id="ic-tag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 12l9 9 9-9-9-9H8a5 5 0 0 0-5 5v3z"></path>
+      <circle cx="9" cy="9" r="1.6"></circle>
+    </symbol>
+    <symbol id="ic-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="9"></circle>
+      <ellipse cx="12" cy="12" rx="5" ry="9"></ellipse>
+      <path d="M3 12h18"></path>
+    </symbol>
+    <symbol id="ic-shuffle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 7h4l4 6 4 4h4"></path>
+      <path d="M20 5l2 2-2 2"></path>
+      <path d="M4 17h4l3-4"></path>
+      <path d="M16 15h6"></path>
+      <path d="M20 13l2 2-2 2"></path>
+    </symbol>
+    <symbol id="ic-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="9" y="9" width="10" height="10" rx="2"></rect>
+      <rect x="5" y="5" width="10" height="10" rx="2"></rect>
+    </symbol>
+    <symbol id="ic-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 16V6"></path>
+      <path d="M8 10l4-4 4 4"></path>
+      <rect x="5" y="16" width="14" height="3" rx="1.5"></rect>
+    </symbol>
+    <symbol id="ic-stats" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="5" y="11" width="3" height="7" rx="1"></rect>
+      <rect x="10" y="6" width="3" height="12" rx="1"></rect>
+      <rect x="15" y="13" width="3" height="5" rx="1"></rect>
+    </symbol>
+    <symbol id="ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="4"></circle>
+      <path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5.5 5.5l-1.5-1.5M20 20l-1.5-1.5M5.5 18.5L4 20M20 4l-1.5 1.5"></path>
+    </symbol>
+    <symbol id="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M16 12a6 6 0 1 1-8-8 7 7 0 0 0 8 8z"></path>
+    </symbol>
+  </svg>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo"><img src="icon.png" alt="LinkShort icon" class="logo-img"></div>
+      <div>LinkShort — URL Shortener (ย่อลิงก์)</div>
+    </div>
+    <div class="toolbar">
+      <button id="themeToggle" class="toggle" aria-label="Toggle theme (สลับธีม)">
+        <span class="track">
+          <svg class="icon moon" aria-hidden="true"><use href="#ic-moon"/></svg>
+          <svg class="icon sun" aria-hidden="true"><use href="#ic-sun"/></svg>
+        </span>
+        <span class="knob" aria-hidden="true"></span>
+      </button>
+      <button class="btn circle" id="aboutBtn" title="About (เกี่ยวกับ)">i</button>
+      <a class="btn ghost" href="https://is.gd/apishorteningreference.php" target="_blank" rel="noopener">API</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="grid">
+      <div class="card">
+        <h2 style="margin:0 0 6px 0;">Shorten URL (ย่อลิงก์)</h2>
+        <p class="hint" style="margin-top:0">Paste a long URL and click “Shorten”<br>• Set a custom alias if available (วางลิงก์ยาว แล้วกด “ย่อลิงก์” • ตั้งชื่อเล่นได้ถ้าว่างอยู่)</p>
+
+        <div class="grid" style="margin-top:10px">
+          <div>
+            <label>Long URL (ลิงก์ยาว)</label>
+            <div class="field">
+              <svg class="icon" aria-hidden="true"><use href="#ic-link"/></svg>
+              <input id="longUrl" type="url" inputmode="url"
+                     placeholder="https://example.com/long/link/here"
+                     autocomplete="off" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div>
+              <label>Custom Alias (ตั้งชื่อลิงก์) <span class="hint">[a-zA-Z0-9_ 5–30]</span></label>
+              <div class="field">
+                <svg class="icon" aria-hidden="true"><use href="#ic-tag"/></svg>
+                <input id="alias" pattern="[A-Za-z0-9_]{5,30}" placeholder="เช่น My_Product_2025 (Not required , ไม่บังคับ)" />
+                <button id="aliasSuggest" class="btn" title="Random (สุ่ม)">
+                  <svg class="icon" aria-hidden="true"><use href="#ic-shuffle"/></svg><span>Random (สุ่ม)</span>
+                </button>
+              </div>
+            </div>
+            <div>
+              <label>Service (บริการ)</label>
+              <div class="field">
+                <svg class="icon" aria-hidden="true"><use href="#ic-globe"/></svg>
+                <select id="service" aria-label="บริการย่อลิงก์">
+                  <option value="is.gd">is.gd</option>
+                  <option value="v.gd">v.gd</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label class="hint"><input type="checkbox" id="logstats" /> Enable stats for this link (เปิดสถิติ — ดูโดยเติม “-” ต่อท้ายลิงก์สั้น)</label>
+          </div>
+
+          <div>
+            <button id="shortenBtn" class="btn primary cta" style="width:100%;">Shorten (ย่อลิงก์)</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin:0 0 6px 0;">Result (ผลลัพธ์)</h3>
+        <div id="result" class="result">
+          <div class="pill muted">No result yet (ยังไม่มีผลลัพธ์)</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin:0 0 6px 0;">History (ประวัติการย่อ)</h3>
+        <div id="history" class="history"></div>
+        <div style="display:flex; gap:8px; margin-top:10px">
+          <button id="clearHistory" class="btn">Clear History (ลบประวัติ)</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- About Modal -->
+  <div id="aboutModal" class="modal-backdrop" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>About (เกี่ยวกับ)</h3>
+        <button id="aboutClose" class="btn circle" aria-label="Close">×</button>
+      </div>
+      <div class="modal-body">
+        <ul class="list">
+          <li>Uses is.gd / v.gd to shorten URLs (ใช้ is.gd / v.gd ในการย่อลิงก์)</li>
+          <li>Supports custom alias (ตั้ง alias ได้)</li>
+          <li>Enable stats; view by appending “-” to the short link (เปิดสถิติได้ — เติม “-” ต่อท้ายลิงก์สั้นเพื่อดู)</li>
+          <li>Tip: Paste a URL and press Enter to shorten (เคล็ดลับ: วางลิงก์แล้วกด Enter เพื่อย่อทันที)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <footer class="bottombar">
+    <div class="foot-content">
+      <span class="muted">© 2025 <strong>LinkShort</strong>. All rights reserved | Developed by <strong id="devName">Thanetphon026</strong></span>
+    </div>
+  </footer>
+</body>
+</html>
