@@ -146,6 +146,19 @@ body.light .toggle .knob{ transform: translateX(30px); }
 body.light .toggle .track .sun{ opacity:.85; transform:scale(1) }
 body.light .toggle .track .moon{ opacity:.25 }
 
+		.copyright-bar a.link-reset {
+  		color: inherit;
+ 		 	text-decoration: none;
+		}
+		.copyright-bar a.link-reset:visited {
+  		color: inherit;
+		}
+		.copyright-bar a.link-reset:hover,
+		.copyright-bar a.link-reset:focus-visible {
+  		opacity: 0.9;       
+  		outline: none;
+		}
+
 /* Bottom bar (non-fixed, stays at page bottom) */
 .bottombar{
   position: static;
